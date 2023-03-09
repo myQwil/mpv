@@ -133,7 +133,7 @@ Available filters are:
              Add this to your ``input.conf`` to step by musical semi-tones::
 
                 [ multiply speed 0.9438743126816935
-                ] multiply speed 1.059463094352953
+                ] multiply speed 1.0594630943592953
 
              .. warning::
 
