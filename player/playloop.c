@@ -150,6 +150,21 @@ bool get_internal_paused(struct MPContext *mpctx)
     return mpctx->opts->pause || mpctx->paused_for_cache;
 }
 
+static void mp_seek(MPContext *mpctx, struct seek_params seek);
+
+static inline void eof_unpause(MPContext *mpctx) {
+    struct playlist *pl = mpctx->playlist;
+    if (pl->num_entries > 1) {
+        struct playlist_entry *next = playlist_get_next(pl, 1);
+        return mp_set_playlist_entry(mpctx, next ? next : playlist_get_first(pl));
+    }
+    mp_seek(mpctx, (struct seek_params) {
+        .type = MPSEEK_ABSOLUTE,
+        .amount = get_start_time(mpctx, mpctx->play_dir),
+        .exact = MPSEEK_DEFAULT,
+    });
+}
+
 // The value passed here is the new value for mpctx->opts->pause
 void set_pause_state(struct MPContext *mpctx, bool user_pause)
 {
@@ -178,6 +193,9 @@ void set_pause_state(struct MPContext *mpctx, bool user_pause)
             mpctx->step_frames = 0;
             mpctx->time_frame -= get_relative_time(mpctx);
         } else {
+            if (mpctx->video_status == STATUS_EOF && mpctx->audio_status == STATUS_EOF)
+                eof_unpause(mpctx);
+
             (void)get_relative_time(mpctx); // ignore time that passed during pause
         }
     }
