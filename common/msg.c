@@ -347,8 +347,8 @@ static void set_msg_color(void *talloc_ctx, bstr *text, int lev)
 static void pretty_print_module(struct mp_log_root *root, bstr *text,
                                 const char *prefix, int lev)
 {
-    size_t prefix_len = strlen(prefix);
-    root->module_indent = MPMAX(10, MPMAX(root->module_indent, prefix_len));
+    size_t prefix_len = MPMAX(10, strlen(prefix));
+    root->module_indent = MPMAX(root->module_indent, prefix_len);
     bool color = root->color[term_msg_fileno(root, lev)];
 
     // Use random color based on the name of the module
