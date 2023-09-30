@@ -33,9 +33,28 @@
 #define MP_CONCAT_(a, b) a ## b
 #define MP_CONCAT(a, b) MP_CONCAT_(a, b)
 
-#define MPMAX(a, b) ((a) > (b) ? (a) : (b))
-#define MPMIN(a, b) ((a) > (b) ? (b) : (a))
-#define MPCLAMP(a, min, max) (((a) < (min)) ? (min) : (((a) > (max)) ? (max) : (a)))
+#define MPMAX(a, b)          \
+({                           \
+    __typeof__ (a) _a = (a); \
+    __typeof__ (b) _b = (b); \
+    _a > _b ? _a : _b;       \
+})
+
+#define MPMIN(a, b)          \
+({                           \
+    __typeof__ (a) _c = (a); \
+    __typeof__ (b) _d = (b); \
+    _c < _d ? _c : _d;       \
+})
+
+#define MPCLAMP(x, min, max)                    \
+({                                              \
+    __typeof__ (x) _x = (x);                    \
+    __typeof__ (min) _min = (min);              \
+    __typeof__ (max) _max = (max);              \
+    _x < _min ? _min : (_x > _max ? _max : _x); \
+})
+
 #define MPSWAP(type, a, b) \
     do { type SWAP_tmp = b; b = a; a = SWAP_tmp; } while (0)
 #define MP_ARRAY_SIZE(s) (sizeof(s) / sizeof((s)[0]))
