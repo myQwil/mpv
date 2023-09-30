@@ -167,7 +167,7 @@ static char **mp_find_all_config_files_limited(void *talloc_ctx,
     ret[num_ret] = NULL;
 
     for (int n = 0; n < num_ret / 2; n++)
-        MPSWAP(char*, ret[n], ret[num_ret - n - 1]);
+        MPSWAP(ret[n], ret[num_ret - n - 1]);
     return ret;
 }
 

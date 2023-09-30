@@ -528,7 +528,7 @@ static long long find_timestamp(struct sd *sd, double pts)
 
     // Sort by start timestamps.
     if (ev[0]->Start > ev[1]->Start)
-        MPSWAP(ASS_Event*, ev[0], ev[1]);
+        MPSWAP(ev[0], ev[1]);
 
     // We want to fix partial overlaps only.
     if (END(ev[0]) >= END(ev[1]))

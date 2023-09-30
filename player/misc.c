@@ -135,7 +135,7 @@ bool get_ab_loop_times(struct MPContext *mpctx, double t[2])
         return false;
 
     if (t[0] * dir > t[1] * dir)
-        MPSWAP(double, t[0], t[1]);
+        MPSWAP(t[0], t[1]);
 
     return true;
 }

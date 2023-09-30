@@ -2773,7 +2773,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                 dp->keyframe = keyframe;
             }
             if (stream->codec->avi_dts)
-                MPSWAP(double, dp->pts, dp->dts);
+                MPSWAP(dp->pts, dp->dts);
             if (i == 0 && block_info->duration_known)
                 dp->duration = block_duration / 1e9;
             if (stream->type == STREAM_AUDIO) {

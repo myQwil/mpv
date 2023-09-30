@@ -55,8 +55,8 @@
     _x < _min ? _min : (_x > _max ? _max : _x); \
 })
 
-#define MPSWAP(type, a, b) \
-    do { type SWAP_tmp = b; b = a; a = SWAP_tmp; } while (0)
+#define MPSWAP(a, b) \
+    do { __typeof__ (b) SWAP_tmp = b; b = a; a = SWAP_tmp; } while (0)
 #define MP_ARRAY_SIZE(s) (sizeof(s) / sizeof((s)[0]))
 
 // align must be a power of two (align >= 1), x >= 0

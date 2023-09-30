@@ -423,8 +423,8 @@ static int plane_data_from_imgfmt(struct pl_plane_data out_data[4],
             for (int i = num_comps - 1; i > 0; i--) {
                 if (sorted[i].offset >= sorted[i - 1].offset)
                     break;
-                MPSWAP(struct mp_imgfmt_comp_desc, sorted[i], sorted[i - 1]);
-                MPSWAP(int, data->component_map[i], data->component_map[i - 1]);
+                MPSWAP(sorted[i], sorted[i - 1]);
+                MPSWAP(data->component_map[i], data->component_map[i - 1]);
             }
         }
 
@@ -1331,8 +1331,8 @@ static void video_screenshot(struct vo *vo, struct voctrl_screenshot *args)
             src = mpi->params.crop;
 
         if (mpi->params.rotate % 180 == 90) {
-            MPSWAP(int, w, h);
-            MPSWAP(int, src_w, src_h);
+            MPSWAP(w, h);
+            MPSWAP(src_w, src_h);
         }
         mp_rect_rotate(&src, src_w, src_h, mpi->params.rotate);
         mp_rect_rotate(&dst, w, h, mpi->params.rotate);

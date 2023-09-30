@@ -174,8 +174,8 @@ static void update_overlay(struct ra_hwdec *hw, bool check_window_only)
     };
 
     if (p->params.rotate % 180 == 90) {
-        MPSWAP(int, dr.src_rect.x, dr.src_rect.y);
-        MPSWAP(int, dr.src_rect.width, dr.src_rect.height);
+        MPSWAP(dr.src_rect.x, dr.src_rect.y);
+        MPSWAP(dr.src_rect.width, dr.src_rect.height);
     }
 
     if (mmal_port_parameter_set(input, &dr.hdr))

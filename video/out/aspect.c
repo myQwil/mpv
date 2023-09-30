@@ -156,8 +156,8 @@ void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
 
     if (vo_caps & VO_CAP_ROTATE90) {
         if (video->rotate % 180 == 90) {
-            MPSWAP(int, src_w, src_h);
-            MPSWAP(int, src_dw, src_dh);
+            MPSWAP(src_w, src_h);
+            MPSWAP(src_dw, src_dh);
         }
         mp_rect_rotate(&src, src_w, src_h, video->rotate);
     }

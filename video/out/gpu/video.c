@@ -830,7 +830,7 @@ static void pass_get_images(struct gl_video *p, struct video_image *vimg,
         get_transform(t->w, t->h, p->image_params.rotate, t->flipped,
                       &img[n].transform);
         if (p->image_params.rotate % 180 == 90)
-            MPSWAP(int, img[n].w, img[n].h);
+            MPSWAP(img[n].w, img[n].h);
 
         off[n] = identity_trans;
 
@@ -2250,7 +2250,7 @@ static void pass_read_video(struct gl_video *p)
             .t = {-rect.x0, -rect.y0},
         };
         if (p->image_params.rotate % 180 == 90)
-            MPSWAP(double, scale.m[0][0], scale.m[1][1]);
+            MPSWAP(scale.m[0][0], scale.m[1][1]);
 
         gl_transform_trans(scale, &fix);
 
@@ -2417,7 +2417,7 @@ static void get_scale_factors(struct gl_video *p, bool transpose_rot, double xy[
     double target_w = p->src_rect.x1 - p->src_rect.x0;
     double target_h = p->src_rect.y1 - p->src_rect.y0;
     if (transpose_rot && p->image_params.rotate % 180 == 90)
-        MPSWAP(double, target_w, target_h);
+        MPSWAP(target_w, target_h);
     xy[0] = (p->dst_rect.x1 - p->dst_rect.x0) / target_w;
     xy[1] = (p->dst_rect.y1 - p->dst_rect.y0) / target_h;
 }
@@ -2944,7 +2944,7 @@ static void pass_render_frame_dumb(struct gl_video *p)
         int cw = img[i].type == PLANE_CHROMA ? p->ra_format.chroma_w : 1;
         int ch = img[i].type == PLANE_CHROMA ? p->ra_format.chroma_h : 1;
         if (p->image_params.rotate % 180 == 90)
-            MPSWAP(int, cw, ch);
+            MPSWAP(cw, ch);
 
         struct gl_transform t = transform;
         t.m[0][0] *= chroma_realign(p->texture_w, cw);
@@ -2985,7 +2985,7 @@ static bool pass_render_frame(struct gl_video *p, struct mp_image *mpi,
         return false;
 
     if (p->image_params.rotate % 180 == 90)
-        MPSWAP(int, p->texture_w, p->texture_h);
+        MPSWAP(p->texture_w, p->texture_h);
 
     if (p->dumb_mode)
         return true;
@@ -3471,8 +3471,8 @@ void gl_video_screenshot(struct gl_video *p, struct vo_frame *frame,
             src = p->image_params.crop;
 
         if (p->image_params.rotate % 180 == 90) {
-            MPSWAP(int, w, h);
-            MPSWAP(int, src_w, src_h);
+            MPSWAP(w, h);
+            MPSWAP(src_w, src_h);
         }
         mp_rect_rotate(&src, src_w, src_h, p->image_params.rotate);
         mp_rect_rotate(&dst, w, h, p->image_params.rotate);

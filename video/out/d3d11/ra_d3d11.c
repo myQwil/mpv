@@ -1259,12 +1259,12 @@ static void blit(struct ra *ra, struct ra_tex *dst, struct ra_tex *src,
     // ra.h seems to imply that both dst_rc and src_rc can be flipped, but it's
     // easier for blit_rpass() if only src_rc can be flipped, so unflip dst_rc.
     if (dst_rc.x0 > dst_rc.x1) {
-        MPSWAP(int, dst_rc.x0, dst_rc.x1);
-        MPSWAP(int, src_rc.x0, src_rc.x1);
+        MPSWAP(dst_rc.x0, dst_rc.x1);
+        MPSWAP(src_rc.x0, src_rc.x1);
     }
     if (dst_rc.y0 > dst_rc.y1) {
-        MPSWAP(int, dst_rc.y0, dst_rc.y1);
-        MPSWAP(int, src_rc.y0, src_rc.y1);
+        MPSWAP(dst_rc.y0, dst_rc.y1);
+        MPSWAP(src_rc.y0, src_rc.y1);
     }
 
     // If format conversion, stretching or flipping is required, a renderpass

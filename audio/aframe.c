@@ -96,7 +96,7 @@ void mp_aframe_unref_data(struct mp_aframe *frame)
 {
     // In a fucked up way, this is less complex than just unreffing the data.
     struct mp_aframe *tmp = mp_aframe_create();
-    MPSWAP(struct mp_aframe, *tmp, *frame);
+    MPSWAP(*tmp, *frame);
     mp_aframe_reset(frame);
     mp_aframe_config_copy(frame, tmp);
     talloc_free(tmp);

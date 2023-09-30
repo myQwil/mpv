@@ -311,8 +311,8 @@ static void resize(struct vo *vo)
     };
 
     if (vo->params && (vo->params->rotate % 180) == 90) {
-        MPSWAP(int, dr.src_rect.x, dr.src_rect.y);
-        MPSWAP(int, dr.src_rect.width, dr.src_rect.height);
+        MPSWAP(dr.src_rect.x, dr.src_rect.y);
+        MPSWAP(dr.src_rect.width, dr.src_rect.height);
     }
 
     if (mmal_port_parameter_set(input, &dr.hdr))

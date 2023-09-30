@@ -331,8 +331,8 @@ static bool va_image_map(struct mp_vaapi_ctx *ctx, VAImage *image,
     }
 
     if (image->format.fourcc == VA_FOURCC_YV12) {
-        MPSWAP(int, mpi->stride[1], mpi->stride[2]);
-        MPSWAP(uint8_t *, mpi->planes[1], mpi->planes[2]);
+        MPSWAP(mpi->stride[1], mpi->stride[2]);
+        MPSWAP(mpi->planes[1], mpi->planes[2]);
     }
 
     return true;

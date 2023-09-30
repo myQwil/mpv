@@ -133,8 +133,8 @@ void mp_rect_rotate(struct mp_rect *rc, int w, int h, int rotation)
 
     if (rotation >= 180) {
         rotation -= 180;
-        MPSWAP(int, rc->x0, rc->x1);
-        MPSWAP(int, rc->y0, rc->y1);
+        MPSWAP(rc->x0, rc->x1);
+        MPSWAP(rc->y0, rc->y1);
     }
 
     if (rotation == 90) {
