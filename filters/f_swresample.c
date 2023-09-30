@@ -570,7 +570,8 @@ static void swresample_process(struct mp_filter *f)
         // Increase the compensation_distance to avoid undesired reset
         // semantics - we want to keep the ratio for the whole frame we're
         // feeding it, until the next filter() call.
-        int mult = INT_MAX / 2 / MPMAX(MPMAX(abs(r.num), abs(r.den)), 1);
+        int den = MPMAX(abs(r.num), abs(r.den));
+        int mult = INT_MAX / 2 / MPMAX(den, 1);
         r = (AVRational){ r.num * mult, r.den * mult };
         if (r.den == r.num)
             r = (AVRational){0}; // fully disable

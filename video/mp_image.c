@@ -41,6 +41,10 @@
 #include "sws_utils.h"
 #include "out/placebo/utils.h"
 
+static inline int8_t imax(int8_t a, int8_t b) {
+    return a > b ? a : b;
+}
+
 // Determine strides, plane sizes, and total required size for an image
 // allocation. Returns total size on success, <0 on error. Unused planes
 // have out_stride/out_plane_size to 0, and out_plane_offset set to -1 up
@@ -204,7 +208,7 @@ void mp_image_sethwfmt(struct mp_image *mpi, enum mp_imgfmt hw_fmt, enum mp_imgf
         struct pl_bit_encoding cbits = {
             .sample_depth = fmt.comps[c].size,
             .color_depth  = fmt.comps[c].size - abs(fmt.comps[c].pad),
-            .bit_shift    = MPMAX(fmt.comps[c].pad, 0),
+            .bit_shift    = imax(fmt.comps[c].pad, 0),
         };
 
         if (bits.sample_depth && !pl_bit_encoding_equal(&bits, &cbits)) {
@@ -696,7 +700,7 @@ void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
             int plane_bits = fmt->bpp[cd->plane] * misery;
             if (plane_bits <= 64 && plane_bits % 8u == 0 && cd->size) {
                 plane_size[cd->plane] = plane_bits / 8u;
-                int depth = cd->size + MPMIN(cd->pad, 0);
+                int depth = cd->size + MPMIN((int8_t)cd->pad, 0);
                 double m, o;
                 mp_get_csp_uint_mul(area.params.repr.sys,
                                     area.params.repr.levels,
