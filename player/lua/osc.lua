@@ -645,8 +645,10 @@ local function update_tracklist()
             table.insert(tracks_osc[type], tracktable[n])
 
             -- by mpv_id
-            tracks_mpv[type][mpv_id] = tracktable[n]
-            tracks_mpv[type][mpv_id].osc_id = #tracks_osc[type]
+            if mpv_id then
+                tracks_mpv[type][mpv_id] = tracktable[n]
+                tracks_mpv[type][mpv_id].osc_id = #tracks_osc[type]
+            end
         end
     end
 end
@@ -2070,7 +2072,7 @@ local function osc_init()
 
     ne.enabled = (#tracks_osc.audio > 0)
     ne.content = function ()
-        local aid = "–"
+        local aid = "–" ---@type string | integer
         if get_track("audio") ~= 0 then
             aid = get_track("audio")
         end
@@ -2096,7 +2098,7 @@ local function osc_init()
 
     ne.enabled = (#tracks_osc.sub > 0)
     ne.content = function ()
-        local sid = "–"
+        local sid = "–" ---@type string | integer
         if get_track("sub") ~= 0 then
             sid = get_track("sub")
         end
