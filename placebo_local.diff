@@ -1,0 +1,24 @@
+diff --git a/meson.build b/meson.build
+index 186af1c795..0686d3d10a 100644
+--- a/meson.build
++++ b/meson.build
+@@ -23,7 +23,18 @@ libavutil = dependency('libavutil', version: '>= 56.70.100')
+ libswresample = dependency('libswresample', version: '>= 3.9.100')
+ libswscale = dependency('libswscale', version: '>= 5.9.100')
+ 
+-libplacebo = dependency('libplacebo', version: '>=6.338.0')
++# libplacebo = dependency('libplacebo', version: '>=6.338.0')
++
++libplacebo_include = [
++    '/usr/local/include/libplacebo',
++    '/usr/local/include/libplacebo/shaders',
++    '/usr/local/include/libplacebo/utils'
++]
++libplacebo = declare_dependency(
++    link_args : ['/usr/local/lib/libplacebo.so'],
++    include_directories : include_directories(libplacebo_include),
++    version: '>=6.338.0'
++)
+ 
+ libass = dependency('libass', version: '>= 0.12.2')
+ 
