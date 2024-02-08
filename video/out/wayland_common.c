@@ -1816,8 +1816,8 @@ static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *heigh
     }
 
     if (wl->resizing_constraint == MP_HEIGHT_CONSTRAINT) {
-        MPSWAP(int, *width, *height);
-        MPSWAP(int, wl->reduced_width, wl->reduced_height);
+        MPSWAP(*width, *height);
+        MPSWAP(wl->reduced_width, wl->reduced_height);
     }
 
     double scale_factor = (double)*width / wl->reduced_width;
@@ -1826,8 +1826,8 @@ static void apply_keepaspect(struct vo_wayland_state *wl, int *width, int *heigh
         *height = ceil(wl->reduced_height * scale_factor);
 
     if (wl->resizing_constraint == MP_HEIGHT_CONSTRAINT) {
-        MPSWAP(int, *width, *height);
-        MPSWAP(int, wl->reduced_width, wl->reduced_height);
+        MPSWAP(*width, *height);
+        MPSWAP(wl->reduced_width, wl->reduced_height);
     }
 }
 

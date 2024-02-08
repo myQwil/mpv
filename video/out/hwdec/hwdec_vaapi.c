@@ -363,7 +363,7 @@ static int mapper_map(struct ra_hwdec_mapper *mapper)
         goto err;
 
     if (desc.fourcc == VA_FOURCC_YV12)
-        MPSWAP(struct ra_tex*, mapper->tex[1], mapper->tex[2]);
+        MPSWAP(mapper->tex[1], mapper->tex[2]);
 
     return 0;
 

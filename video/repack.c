@@ -751,7 +751,7 @@ static void setup_nv_packer(struct mp_repack *rp)
     int cr0 = desc.planes[1].components[0];
     int cr1 = desc.planes[1].components[1];
     if (cr0 > cr1)
-        MPSWAP(int, cr0, cr1);
+        MPSWAP(cr0, cr1);
     if (cr0 != 2 || cr1 != 3)
         return;
 
@@ -1019,12 +1019,11 @@ static bool setup_format_ne(struct mp_repack *rp)
     // Reverse if unpack (to reflect actual data flow)
     if (!rp->pack) {
         for (int n = 0; n < rp->num_steps / 2; n++) {
-            MPSWAP(struct repack_step, rp->steps[n],
-                   rp->steps[rp->num_steps - 1 - n]);
+            MPSWAP(rp->steps[n], rp->steps[rp->num_steps - 1 - n]);
         }
         for (int n = 0; n < rp->num_steps; n++) {
             struct repack_step *rs = &rp->steps[n];
-            MPSWAP(struct mp_imgfmt_desc, rs->fmt[0], rs->fmt[1]);
+            MPSWAP(rs->fmt[0], rs->fmt[1]);
         }
     }
 

@@ -194,7 +194,7 @@ void mp_subprocess2(struct mp_subprocess_opts *opts,
             assert(opts->fds[n].on_write && opts->fds[n].write_buf);
             if (mp_make_cloexec_pipe(comm_pipe[n]) < 0)
                 goto done;
-            MPSWAP(int, comm_pipe[n][0], comm_pipe[n][1]);
+            MPSWAP(comm_pipe[n][0], comm_pipe[n][1]);
 
             struct sigaction sa = {.sa_handler = SIG_IGN, .sa_flags = SA_RESTART};
             sigfillset(&sa.sa_mask);
