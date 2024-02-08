@@ -405,7 +405,7 @@ void gl_sc_uniform_vec3(struct gl_shader_cache *sc, char *name, float f[3])
 
 static void transpose2x2(float r[2 * 2])
 {
-    MPSWAP(float, r[0+2*1], r[1+2*0]);
+    MPSWAP(r[0+2*1], r[1+2*0]);
 }
 
 void gl_sc_uniform_mat2(struct gl_shader_cache *sc, char *name,
@@ -425,9 +425,9 @@ void gl_sc_uniform_mat2(struct gl_shader_cache *sc, char *name,
 
 static void transpose3x3(float r[3 * 3])
 {
-    MPSWAP(float, r[0+3*1], r[1+3*0]);
-    MPSWAP(float, r[0+3*2], r[2+3*0]);
-    MPSWAP(float, r[1+3*2], r[2+3*1]);
+    MPSWAP(r[0+3*1], r[1+3*0]);
+    MPSWAP(r[0+3*2], r[2+3*0]);
+    MPSWAP(r[1+3*2], r[2+3*1]);
 }
 
 void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
