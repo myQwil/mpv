@@ -456,6 +456,7 @@ local function chapter_mode_refresh()
     local m = 100 / duration
     local sl = state.slider_element.slider
     sl.min.value, sl.max.value = start * m, stop * m
+    sl.start, sl.stop = start, stop
 end
 
 local function get_hidetimeout()
@@ -1043,7 +1044,8 @@ local function new_element(name, type)
     elements[name].state = {}
 
     if type == "slider" then
-        elements[name].slider = {min = {value = 0}, max = {value = 100}}
+        elements[name].slider = {min = {value = 0}, max = {value = 100},
+            start = 0, stop = 0}
     end
 
 
@@ -2017,6 +2019,9 @@ local function osc_init()
         local duration = mp.get_property_number("duration")
         if duration ~= nil and pos ~= nil then
             local possec = duration * (pos / 100)
+            if state.chapter_mode then
+                possec = possec - state.slider_element.slider.start
+            end
             return mp.format_time(possec)
         else
             return ""
@@ -2106,11 +2111,15 @@ local function osc_init()
     ne = new_element("tc_left", "button")
 
     ne.content = function ()
-        if state.tc_ms then
-            return (mp.get_property_osd("playback-time/full"))
-        else
-            return (mp.get_property_osd("playback-time"))
+        local time = mp.get_property_number("playback-time", nil)
+        if not time then
+            return ""
         end
+        if state.chapter_mode then
+            time = time - state.slider_element.slider.start
+        end
+        return mp.format_time(time,
+            state.tc_ms and "%H:%M:%S.%T" or "%H:%M:%S")
     end
     ne.eventresponder["mbtn_left_up"] = function ()
         state.tc_ms = not state.tc_ms
@@ -2122,20 +2131,33 @@ local function osc_init()
 
     ne.visible = (mp.get_property_number("duration", 0) > 0)
     ne.content = function ()
-        if state.rightTC_trem then
-            local minus = user_opts.unicodeminus and UNICODE_MINUS or "-"
-            local property = user_opts.remaining_playtime and "playtime-remaining"
-                                                           or "time-remaining"
-            if state.tc_ms then
-                return (minus..mp.get_property_osd(property .. "/full"))
+        if state.chapter_mode then
+            local sl = state.slider_element.slider
+            if state.rightTC_trem then
+                local time = mp.get_property_number("playback-time", nil)
+                if not time then
+                    return ""
+                end
+                local remain = sl.stop - time
+                if user_opts.remaining_playtime then
+                    remain = remain / (mp.get_property_number("speed") *
+                        mp.get_property_number("video-speed-correction"))
+                end
+                local minus = user_opts.unicodeminus and UNICODE_MINUS or "-"
+                return minus..mp.format_time(remain,
+                    state.tc_ms and "%H:%M:%S.%T" or "%H:%M:%S")
             else
-                return (minus..mp.get_property_osd(property))
+                return mp.format_time(sl.stop - sl.start,
+                    state.tc_ms and "%H:%M:%S.%T" or "%H:%M:%S")
             end
         else
-            if state.tc_ms then
-                return (mp.get_property_osd("duration/full"))
+            local format = state.tc_ms and "/full" or ""
+            if state.rightTC_trem then
+                local minus = user_opts.unicodeminus and UNICODE_MINUS or "-"
+                return minus..mp.get_property_osd((user_opts.remaining_playtime and
+                    "playtime-remaining" or "time-remaining")..format)
             else
-                return (mp.get_property_osd("duration"))
+                return mp.get_property_osd("duration"..format)
             end
         end
     end
