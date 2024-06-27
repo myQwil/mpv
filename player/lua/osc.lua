@@ -1477,6 +1477,14 @@ layouts["slimbox"] = function ()
 end
 
 local function bar_layout(direction)
+    local rows
+    if math.abs(direction) > 1 then
+        rows = 3
+        direction = direction / 2
+    else
+        rows = 2
+    end
+
     local unit = 3
     local padY = unit
     local padX = unit * 3
@@ -1489,10 +1497,10 @@ local function bar_layout(direction)
         y = nil,
         an = (direction < 0) and 7 or 1,
         w = nil,
-        h = padY*2 + titleW + buttonH,
+        h = padY*rows + titleW*(rows-1) + buttonH,
     }
 
-    local tcW = (state.tc_ms) and 170 or 110
+    local tcW = (state.tc_ms and rows < 3) and 170 or 110
     if user_opts.tcspace >= 50 and user_opts.tcspace <= 200 then
         -- adjust our hardcoded font size estimation
         tcW = tcW * user_opts.tcspace / 100
@@ -1527,7 +1535,7 @@ local function bar_layout(direction)
     end
 
     local line1 = osc_geo.y - direction * (padY + titleW/2)
-    local line2 = osc_geo.y - direction * (padY*2 + titleW + buttonH/2)
+    local line2 = osc_geo.y - direction * (padY*rows + titleW*(rows-1) + buttonH/2)
 
     osc_param.areas = {}
 
@@ -1612,11 +1620,10 @@ local function bar_layout(direction)
     -- Left timecode
     geo = { x = geo.x + geo.w + padX + tcW, y = geo.y, an = 6,
             w = tcW, h = geo.h }
+    local geo_l = geo
     lo = add_layout("tc_left")
     lo.geometry = geo
     lo.style = osc_styles.timecodesBar
-
-    local sb_l = geo.x + padX
 
     -- Fullscreen button
     geo = { x = osc_geo.x + osc_geo.w - buttonW - padX - padwc_r, y = geo.y, an = 4,
@@ -1646,16 +1653,27 @@ local function bar_layout(direction)
     -- Right timecode
     geo = { x = geo.x - padX - tcW - 10, y = geo.y, an = geo.an,
             w = tcW, h = geo.h }
+    local geo_r = geo
     lo = add_layout("tc_right")
     lo.geometry = geo
     lo.style = osc_styles.timecodesBar
 
-    local sb_r = geo.x - padX
-
 
     -- Seekbar
-    geo = { x = sb_l, y = geo.y, an = geo.an,
-            w = math.max(0, sb_r - sb_l), h = geo.h }
+    local sb_l = geo_l.x + padX
+    local sb_r = geo_r.x - padX
+    if rows > 2 then
+        local sb_half = (sb_r - sb_l) / 2 - padX
+        geo_l.x = geo_l.x + sb_half
+        geo_r.x = geo_r.x - sb_half
+        local line = osc_geo.y - direction * (padY*2 + titleW + titleW/2)
+        geo = { x = osc_geo.x, y = line, an = geo.an,
+                w = osc_geo.w, h = titleW }
+    else
+        geo = { x = sb_l, y = geo.y, an = geo.an,
+                w = math.max(0, sb_r - sb_l), h = geo.h }
+    end
+
     new_element("bgbar1", "box")
     lo = add_layout("bgbar1")
 
@@ -1692,6 +1710,14 @@ end
 
 layouts["topbar"] = function()
     bar_layout(1)
+end
+
+layouts["bottombar2"] = function()
+    bar_layout(-2)
+end
+
+layouts["topbar2"] = function()
+    bar_layout(2)
 end
 
 
@@ -2117,7 +2143,7 @@ local function osc_init()
 
     -- load window controls
     if window_controls_enabled() then
-        window_controls(user_opts.layout == "topbar")
+        window_controls(user_opts.layout:sub(1, 6) == "topbar")
     end
 
     --do something with the elements
