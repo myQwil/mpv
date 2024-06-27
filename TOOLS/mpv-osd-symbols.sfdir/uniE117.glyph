@@ -1,0 +1,13 @@
+StartChar: uniE117
+Encoding: 57623 57623 35
+Width: 800
+Flags: W
+LayerCount: 2
+Fore
+SplineSet
+400 0 m 1
+ 0 600 l 1
+ 800 600 l 1
+ 400 0 l 1
+EndSplineSet
+EndChar
