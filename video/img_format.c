@@ -400,7 +400,7 @@ fail:
         desc->comps[n] = (struct mp_imgfmt_comp_desc){0};
     // Average bit size fallback.
     desc->num_planes = av_pix_fmt_count_planes(fmt);
-    for (int p = 0; p < desc->num_planes; p++) {
+    for (int p = 0, n = MPMIN(desc->num_planes, MP_MAX_PLANES); p < n; p++) {
         int ls = av_image_get_linesize(fmt, 256, p);
         desc->bpp[p] = ls > 0 ? ls * 8 / 256 : 0;
     }
