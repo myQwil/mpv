@@ -1804,6 +1804,8 @@ if get_option('cplayer')
     mpv = executable('mpv', main_fn_source, objects: libmpv.extract_all_objects(recursive: true), dependencies: dependencies,
                      win_subsystem: get_option('win32-subsystem'), install: true)
 
+    install_data(join_paths(tools_directory, 'umpv'), install_dir: get_option('bindir'))
+
     if win32 and get_option('win32-subsystem') != 'console'
         wrapper_sources= 'osdep/win32-console-wrapper.c'
         executable('mpv', wrapper_sources, c_args: '-municode', link_args: '-municode',
