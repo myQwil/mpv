@@ -1477,17 +1477,21 @@ layouts["slimbox"] = function ()
 end
 
 local function bar_layout(direction)
+    local unit = 3
+    local padY = unit
+    local padX = unit * 3
+    local titleW = unit * 6
+    local buttonW = unit * 9
+    local buttonH = unit * 10
+
     local osc_geo = {
         x = -2,
         y = nil,
         an = (direction < 0) and 7 or 1,
         w = nil,
-        h = 56,
+        h = padY*2 + titleW + buttonH,
     }
 
-    local padX = 9
-    local padY = 3
-    local buttonW = 27
     local tcW = (state.tc_ms) and 170 or 110
     if user_opts.tcspace >= 50 and user_opts.tcspace <= 200 then
         -- adjust our hardcoded font size estimation
@@ -1516,14 +1520,14 @@ local function bar_layout(direction)
         osc_param.playresx = osc_param.playresy * osc_param.display_aspect
     end
 
-    osc_geo.y = direction * (54 + user_opts.barmargin)
+    osc_geo.y = direction * (osc_geo.h + user_opts.barmargin)
     osc_geo.w = osc_param.playresx + 4
     if direction < 0 then
         osc_geo.y = osc_geo.y + osc_param.playresy
     end
 
-    local line1 = osc_geo.y - direction * (9 + padY)
-    local line2 = osc_geo.y - direction * (36 + padY)
+    local line1 = osc_geo.y - direction * (padY + titleW/2)
+    local line2 = osc_geo.y - direction * (padY*2 + titleW + buttonH/2)
 
     osc_param.areas = {}
 
@@ -1557,7 +1561,7 @@ local function bar_layout(direction)
 
     -- Playlist prev/next
     geo = { x = osc_geo.x + padX, y = line1,
-            an = 4, w = 18, h = 18 - padY }
+            an = 4, w = titleW, h = titleW - padY }
     lo = add_layout("playlist_prev")
     lo.geometry = geo
     lo.style = osc_styles.topButtonsBar
@@ -1590,7 +1594,7 @@ local function bar_layout(direction)
 
     -- Playback control buttons
     geo = { x = osc_geo.x + padX + padwc_l, y = line2, an = 4,
-            w = buttonW, h = 36 - padY*2}
+            w = buttonW, h = buttonH }
     lo = add_layout("play_pause")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
