@@ -1716,17 +1716,21 @@ layouts["slimbox"] = function ()
 end
 
 local function bar_layout(direction, slim)
+    local unit = 3
+    local padY = unit
+    local padX = unit * 3
+    local titleW = unit * 6
+    local buttonW = unit * 9
+    local buttonH = unit * 10
+
     local osc_geo = {
         x = -2,
         y = nil,
         an = (direction < 0) and 7 or 1,
         w = nil,
-        h = slim and 25 or 56,
+        h = slim and 25 or (padY*2 + titleW + buttonH),
     }
 
-    local padX = 9
-    local padY = 3
-    local buttonW = 27
     local tcW = (state.tc_ms) and 170 or 110
     if user_opts.tcspace >= 50 and user_opts.tcspace <= 200 then
         -- adjust our hardcoded font size estimation
@@ -1767,8 +1771,8 @@ local function bar_layout(direction, slim)
         osc_param.video_margins.t = osc_geo.h / osc_param.playresy
     end
 
-    local line1 = osc_geo.y - direction * (9 + padY)
-    local line2 = osc_geo.y - direction * (36 + padY)
+    local line1 = osc_geo.y - direction * (padY + titleW/2)
+    local line2 = osc_geo.y - direction * (padY*2 + titleW + buttonH/2)
 
     osc_param.areas = {}
 
@@ -1801,7 +1805,7 @@ local function bar_layout(direction, slim)
 
 
     -- Menu
-    geo = { x = osc_geo.x + padX + 4, y = line1, an = 4, w = 18, h = 18 - padY }
+    geo = { x = osc_geo.x + padX + 4, y = line1, an = 4, w = titleW, h = titleW - padY }
     lo = add_layout("menu")
     lo.geometry = geo
     lo.style = osc_styles.topButtonsBar
@@ -1864,7 +1868,7 @@ local function bar_layout(direction, slim)
 
     -- Playback control buttons
     geo = { x = osc_geo.x + padX + padwc_l, y = line2, an = 4,
-            w = buttonW, h = 36 - padY*2}
+            w = buttonW, h = buttonH }
     lo = add_layout("play_pause")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsBar
