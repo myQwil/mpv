@@ -2723,40 +2723,33 @@ local function osc_init()
     -- tc_right (total/remaining time)
     ne = new_element("tc_right", "button")
 
+    local fmt_tcr = function(duration)
+        if user_opts.remaining_playtime then
+            duration = duration / (mp.get_property_number("speed", 1) *
+                mp.get_property_number("video-speed-correction", 1))
+        end
+        return mp.format_time(duration,
+            state.tc_ms and "%H:%M:%S.%T" or "%H:%M:%S")
+    end
+
     ne.visible = state.duration and state.duration > 0
     ne.content = function ()
         if state.chapter_mode then
             local sl = state.slider_element.slider
             if state.rightTC_trem then
-                local time = mp.get_property_number("playback-time", nil)
-                if not time then
-                    return ""
-                end
-                local remain = sl.stop - time
-                if user_opts.remaining_playtime then
-                    remain = remain / (mp.get_property_number("speed") *
-                        mp.get_property_number("video-speed-correction"))
-                end
+                local time = mp.get_property_number("playback-time", 0)
                 local minus = user_opts.unicodeminus and UNICODE_MINUS or "-"
-                return minus..mp.format_time(remain,
-                    state.tc_ms and "%H:%M:%S.%T" or "%H:%M:%S")
+                return minus..fmt_tcr(sl.stop - time)
             else
-                return mp.format_time(sl.stop - sl.start,
-                    state.tc_ms and "%H:%M:%S.%T" or "%H:%M:%S")
+                return fmt_tcr(sl.stop - sl.start)
             end
         else
             if state.rightTC_trem then
                 local minus = user_opts.unicodeminus and UNICODE_MINUS or "-"
-                local property = user_opts.remaining_playtime and "playtime-remaining"
-                                                               or "time-remaining"
-                if state.tc_ms then
-                    return (minus..mp.get_property_osd(property .. "/full"))
-                else
-                    return (minus..mp.get_property_osd(property))
-                end
+                return minus..fmt_tcr(mp.get_property_number("time-remaining", 0))
+            else
+                return fmt_tcr(state.duration or 0)
             end
-
-            return mp.format_time(state.duration or 0, state.tc_ms and "%H:%M:%S.%T" or "%H:%M:%S")
         end
     end
     ne.eventresponder["mbtn_left_up"] =
