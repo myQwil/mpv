@@ -63,6 +63,7 @@ local user_opts = {
     greenandgrumpy = false,     -- disable santa hat
     livemarkers = true,         -- update seekbar chapter markers on duration change
     chapter_fmt = "Chapter: %s", -- chapter print format for seekbar-hover. "no" to disable
+    chapter_mode = false,       -- the initial state of chapter mode.
     unicodeminus = false,       -- whether to use the Unicode minus sign character
     icon_style = "layout",      -- icon style: layout/classic/fluent
 
@@ -176,6 +177,8 @@ local icon_styles = {
         minimize = "\238\132\146",       -- E112
         maximize = "\238\132\147",       -- E113
         unmaximize = "\238\132\148",     -- E114
+        ch_mode_off = "\238\132\150",    -- E116
+        ch_mode_on = "\238\132\151",     -- E117
     },
     fluent = {
         menu = "\238\136\128",           -- E200
@@ -201,6 +204,8 @@ local icon_styles = {
         minimize = "\238\136\147",       -- E213
         maximize = "\238\136\148",       -- E214
         unmaximize = "\238\136\149",     -- E215
+        ch_mode_off = "\238\132\150",    -- E116
+        ch_mode_on = "\238\132\151",     -- E117
     },
 }
 local icons = icon_styles.classic
@@ -292,6 +297,7 @@ local state = {
     anitype = nil,                          -- current type of animation
     animation = nil,                        -- current animation alpha
     mouse_down_counter = 0,                 -- used for softrepeat
+    slider_element = nil,                   -- the seek bar element
     active_element = nil,                   -- nil = none, 0 = background, 1+ = see elements[]
     active_event_source = nil,              -- the "button" that issued the current event
     rightTC_trem = not user_opts.timetotal, -- if the right timecode should display total or remaining time
@@ -324,6 +330,7 @@ local state = {
     osd = mp.create_osd_overlay("ass-events"),
     logo_osd = mp.create_osd_overlay("ass-events"),
     chapter_list = {},                      -- sorted by time
+    chapter_mode = false,                   -- whether seek bar is for current chapter
     visibility_modes = {},                  -- visibility_modes to cycle through
     osc_message_warned = false,             -- deprecation warnings
     osc_chapterlist_warned = false,
@@ -573,6 +580,25 @@ local function ass_draw_rr_h_ccw(ass, x0, y0, x1, y1, r1, hexagon, r2)
     else
         ass:round_rect_ccw(x0, y0, x1, y1, r1, r2)
     end
+end
+
+local function chapter_mode_refresh()
+    local count = mp.get_property_number("chapter-list/count")
+    if count <= 0 then
+        return
+    end
+    state.active_element = nil -- stop seeking to prevent skipping chapters
+    local i = mp.get_property_number("chapter")
+    local duration = mp.get_property_number("duration")
+
+    local start = (i < 0) and 0 or
+        mp.get_property_number("chapter-list/"..i.."/time")
+    local stop = (i >= count - 1) and duration or
+        mp.get_property_number("chapter-list/"..(i + 1).."/time")
+
+    local m = 100 / duration
+    local sl = state.slider_element.slider
+    sl.min.value, sl.max.value = start * m, stop * m
 end
 
 local function get_hidetimeout()
@@ -833,6 +859,7 @@ local function prepare_elements()
 
             -- marker nibbles
             if element.slider.markerF ~= nil and slider_lo.gap > 0 then
+                local marker_ass = assdraw.ass_new()
                 local markers = element.slider.markerF()
                 for _,marker in pairs(markers) do
                     if marker > element.slider.min.value and
@@ -846,18 +873,18 @@ local function prepare_elements()
 
                             --top
                             if slider_lo.nibbles_top then
-                                static_ass:move_to(s - (a / 2), slider_lo.border)
-                                static_ass:line_to(s + (a / 2), slider_lo.border)
-                                static_ass:line_to(s, foV)
+                                marker_ass:move_to(s - (a / 2), slider_lo.border)
+                                marker_ass:line_to(s + (a / 2), slider_lo.border)
+                                marker_ass:line_to(s, foV)
                             end
 
                             --bottom
                             if slider_lo.nibbles_bottom then
-                                static_ass:move_to(s - (a / 2),
+                                marker_ass:move_to(s - (a / 2),
                                     elem_geo.h - slider_lo.border)
-                                static_ass:line_to(s,
+                                marker_ass:line_to(s,
                                     elem_geo.h - foV)
-                                static_ass:line_to(s + (a / 2),
+                                marker_ass:line_to(s + (a / 2),
                                     elem_geo.h - slider_lo.border)
                             end
 
@@ -865,19 +892,20 @@ local function prepare_elements()
 
                             --top
                             if slider_lo.nibbles_top then
-                                static_ass:rect_cw(s - 1, slider_lo.border,
+                                marker_ass:rect_cw(s - 1, slider_lo.border,
                                     s + 1, slider_lo.border + slider_lo.gap);
                             end
 
                             --bottom
                             if slider_lo.nibbles_bottom then
-                                static_ass:rect_cw(s - 1,
+                                marker_ass:rect_cw(s - 1,
                                     elem_geo.h -slider_lo.border -slider_lo.gap,
                                     s + 1, elem_geo.h - slider_lo.border);
                             end
                         end
                     end
                 end
+                element.marker_ass = marker_ass
             end
         end
 
@@ -977,6 +1005,9 @@ local function render_elements(master_ass)
         end
 
         if element.type == "slider" then
+            if not state.chapter_mode then
+                elem_ass:merge(element.marker_ass)
+            end
 
             local slider_lo = element.layout.slider
             local elem_geo = element.layout.geometry
@@ -1852,6 +1883,14 @@ local function bar_layout(direction, slim)
         lo.geometry = geo
         lo.style = osc_styles.topButtonsBar
     else
+        -- Chapter mode
+        geo = { x = t_r, y = geo.y, an = 6, w = buttonW, h = geo.h }
+        lo = add_layout("ch_mode")
+        lo.geometry = geo
+        lo.style = osc_styles.topButtonsBar
+
+        t_r = t_r - geo.w
+
         -- Cache
         geo = { x = t_r, y = geo.y, an = 6, w = 150, h = geo.h }
         lo = add_layout("cache")
@@ -2284,6 +2323,7 @@ local function osc_init()
     local have_pl = (pl_count > 1)
     local pl_pos = mp.get_property_number("playlist-pos", 0) + 1
     local have_ch = (mp.get_property_number("chapters", 0) > 0)
+    local have_pos = (mp.get_property("percent-pos") ~= nil)
     local loop = mp.get_property("loop-playlist", "no")
 
     local ne
@@ -2319,6 +2359,25 @@ local function osc_init()
     ne.content = icons.next
     ne.enabled = (have_pl and (pl_pos < pl_count)) or (loop ~= "no")
     bind_mouse_buttons("playlist_next")
+
+    -- chapter mode
+    ne = new_element("ch_mode", "button")
+
+    ne.content = function ()
+        return state.chapter_mode and icons.ch_mode_on or icons.ch_mode_off
+    end
+    ne.eventresponder["mbtn_left_up"] = function ()
+        user_opts.chapter_mode = not user_opts.chapter_mode
+        state.chapter_mode = user_opts.chapter_mode
+        if state.chapter_mode then
+            chapter_mode_refresh()
+        else
+            local sl = state.slider_element.slider
+            sl.min.value, sl.max.value = 0, 100
+        end
+    end
+    ne.visible = have_ch and have_pos
+    state.chapter_mode = ne.visible and user_opts.chapter_mode
 
 
     -- big buttons
@@ -2424,7 +2483,7 @@ local function osc_init()
     --seekbar
     ne = new_element("seekbar", "slider")
 
-    ne.enabled = mp.get_property("percent-pos") ~= nil
+    ne.enabled = have_pos
                  and user_opts.layout ~= "slimbottombar"
                  and user_opts.layout ~= "slimtopbar"
     state.slider_element = ne.enabled and ne or nil  -- used for forced_title
@@ -2622,6 +2681,10 @@ local function osc_init()
 
     --do something with the elements
     prepare_elements()
+
+    if state.chapter_mode then
+        chapter_mode_refresh() -- refresh after preparing markers
+    end
 
     update_margins()
 end
@@ -3135,6 +3198,15 @@ mp.observe_property("chapter-list", "native", function(_, list)
     state.chapter_list = list
     update_duration_watch()
     request_init()
+end)
+
+mp.observe_property("chapter", nil, function()
+    if not state.slider_element then
+        return
+    end
+    if state.chapter_mode then
+        chapter_mode_refresh()
+    end
 end)
 
 -- These are for backwards compatibility only.
