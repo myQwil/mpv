@@ -319,6 +319,8 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
     if (seek.type == MPSEEK_CHAPTER) {
         mpctx->last_chapter_flag = false;
         seek.type = MPSEEK_ABSOLUTE;
+    } else {
+        mpctx->last_chapter_seek = -2;
     }
 
     bool hr_seek_very_exact = seek.exact == MPSEEK_VERY_EXACT;
