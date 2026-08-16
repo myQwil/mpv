@@ -625,7 +625,7 @@ local function ass_draw_rr_h_ccw(ass, x0, y0, x1, y1, r1, hexagon, r2)
     end
 end
 
-local function chapter_mode_refresh()
+local function chapter_mode_refresh(i)
     if state.duration == nil or state.duration == 0 then
         return
     end
@@ -634,9 +634,8 @@ local function chapter_mode_refresh()
         return
     end
     state.active_element = nil -- stop seeking to prevent skipping chapters
-    local i = mp.get_property_number("chapter")
 
-    local start = (i < 0) and 0 or
+    local start = (i == nil or i < 0) and 0 or
         mp.get_property_number("chapter-list/"..i.."/time")
     local stop = (i >= count - 1) and state.duration or
         mp.get_property_number("chapter-list/"..(i + 1).."/time")
@@ -2499,7 +2498,7 @@ local function osc_init()
         user_opts.chapter_mode = not user_opts.chapter_mode
         state.chapter_mode = user_opts.chapter_mode
         if state.chapter_mode then
-            chapter_mode_refresh()
+            chapter_mode_refresh(mp.get_property_number("chapter"))
         else
             local sl = state.slider_element.slider
             sl.min.value, sl.max.value = 0, 100
@@ -2814,7 +2813,8 @@ local function osc_init()
     prepare_elements()
 
     if state.chapter_mode then
-        chapter_mode_refresh() -- refresh after preparing markers
+        -- refresh after preparing markers
+        chapter_mode_refresh(mp.get_property_number("chapter"))
     end
 
     update_margins()
@@ -3337,12 +3337,12 @@ observe_cached("duration", function ()
     end
 end)
 
-mp.observe_property("chapter", nil, function()
+mp.observe_property("chapter", "number", function(_, i)
     if not state.slider_element then
         return
     end
     if state.chapter_mode then
-        chapter_mode_refresh()
+        chapter_mode_refresh(i)
     end
 end)
 
